@@ -1,0 +1,139 @@
+const canvas = document.getElementById('myCanvas');
+const ctx = canvas.getContext('2d');
+
+var actualWidth;
+var stack = [[0, 0]];
+var visited = 1;
+var width = 7;
+var height = 7;
+
+function resizeCanvas() {
+    canvas.width = screen.width;
+    canvas.height = screen.height;
+}
+
+function quickRandom(maxValue, bias = 0) {
+  return Math.floor(Math.random() * maxValue + bias);
+}
+
+function generate2dArray(positionValue = 0, width, height, border = false) {
+    let array = [];
+    if (border === true) {
+        positionValue = 1;
+    }
+    for (let row = 0; row < height; row++) {
+        array[row] = [];
+        for (let col = 0; col < width; col++) {
+            array[row][col] = [positionValue];
+        }
+    }
+    if (border === true) {
+        for (let row = 1; row < height - 1; row++) {
+            for (let col = 1; col < width - 1; col++) {
+                array[row][col] = 0;
+            }
+        }
+    }
+    return array;
+}
+
+function generate2dMaze(array, width, height) {
+    array2 = generate2dArray[0,width * 3,height * 3];
+    currentCell = [0, 0];
+    array[currentCell[0]][currentCell[1]] = 1;
+    adjCells = [];
+    visited = 0;
+    while (visited < width * height - 20) {
+        if (currentCell[1] != 0) {
+            if (array[currentCell[0]][currentCell[1] - 1] == 0) {
+                adjCells.push([currentCell[0], currentCell[1] - 1]);
+            }
+        }
+        if (currentCell[0] != width - 1) {
+            if (array[currentCell[0] + 1][currentCell[1]] == 0) {
+                adjCells.push([currentCell[0] + 1, currentCell[1]]);
+            }
+        }
+        if (currentCell[1] != height - 1) {
+            if (array[currentCell[0]][currentCell[1] + 1] == 0) {
+                adjCells.push([currentCell[0], currentCell[1] + 1]);
+            }
+        }
+        if (currentCell[0] != 0) {
+            if (array[currentCell[0] - 1][currentCell[1]] == 0) {
+                adjCells.push([currentCell[0] - 1, currentCell[1]]);
+            }
+        }
+        if (adjCells.length > 0) {
+            let chosenCell = adjCells[quickRandom(adjCells.length)];
+            stack.push(currentCell);
+            array[chosenCell[0]][chosenCell[1]] = 1;
+            visited += 1;
+            currentCell = chosenCell;
+            adjCells = [];
+        } else {
+            currentCell = stack.pop();
+        }
+    }
+}
+
+function displayArrayConsole(array, height) {
+  for (row = 0; row < height; row++) {
+    console.log(array[row]);
+  }
+}
+
+function displayBoard(array,width,height) {
+    for (row = 0; row < height; row++) {
+        for (col = 0; col < width; col++) {
+            ctx.beginPath();
+            if (array[row][col] == 1) {
+                ctx.fillStyle = "red";
+            }
+            if (array[row][col] == 0) {
+                ctx.fillStyle = "black";
+            }
+            ctx.fillRect(col * 50, row * 50, 40,40);
+            ctx.stroke();
+        }
+    }
+}
+
+function generateAdjustedBoard(array1,array2, width, height) {
+    for (let row = 0; row < height; row++) {
+        for (let col = 0; col < width; col++) {
+            array2[2 * (row + 1) - 1][2 * (col + 1) - 1] = array1[row][col];
+        }
+    }
+    return array2;
+}
+
+function displayAdjustedBoard(array, width, height) {
+    for (row = 0; row < height; row++) {
+        for (col = 0; col < width; col++) {
+            ctx.beginPath();
+            if (array[row][col] == 1) {
+                ctx.fillStyle = "red";
+            }
+            if (array[row][col] == 0) {
+                ctx.fillStyle = "black";
+            }
+            ctx.fillRect(col * 50, row * 50, 40,40);
+            ctx.stroke();
+        }
+    }
+}
+
+function main() {
+    resizeCanvas();
+    boardArray = generate2dArray(0, width, height, false);
+    adjustedBoardArray = generate2dArray(0,21,21,false);
+    adjustedBoardArray = generate2dArray(boardArray,adjustedBoardArray,width,height);
+
+    displayArrayConsole(boardArray, height);
+    displayBoard(boardArray,width,height);
+    //displayAdjustedBoard(adjustedBoardArray, 21, 21);
+    console.log(stack);
+}
+
+main();
